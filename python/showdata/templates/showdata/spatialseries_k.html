@@ -1,142 +1,13 @@
-{% extends "base.html" %}
-{% load leaflet_tags %}
-{% load geojson_tags %}
-{% load i18n %}
-{% load staticfiles %}
-{% block extra_assets %}
-{% leaflet_js %}
-{% leaflet_css %}
-
-    <script src="{% static "rmap/libs/jquery/2.1.1/jquery.min.js" %}" type="text/javascript"></script>
-    <!-- Custom styles for this template -->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
- <link rel="stylesheet" href="{% static "rmap/libs/jquery-ui-1.12.1/jquery-ui.min.css" %}" type="text/css" />
- <script type="text/javascript" src="{% static "rmap/libs/jquery-ui-1.12.1/jquery-ui.min.js" %}" ></script>
- <script type="text/javascript" src="{% static "showdata/PruneCluster.js" %}" ></script>
-
-
- <link rel="stylesheet" type="text/css" href="{% static "showdata/LeafletStyleSheet.css" %}" >
-
-
-<style>
-
-.ui-dialog,.ui-dialog-content {background:green; z-index: 1000;}
-
-.myDivIcon {
-    /*opacity: .9; */border: 1px solid #000;
-    font-family: "Lucida Grande", "Arial", sans-serif;
-    font-size: 11px;
-    font-weight: bold;
-    text-align: center;
-    width: 20px;
-    height: 14px;
-    vertical-align: middle;
-    border-radius: 3px;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    -khtml-border-radius: 3px;
-    color: #FFF;
-    background: #333;
-    line-height: 14px;
-}
-
-
-<!--
-.leaflet-label {
-    background: rgba(235, 235, 235, 0.95);
-    z-index: 10000 !important;
--->
-}
-
-
-</style>
-
-<script src= {% static "showdata/jquery.preload.min.js" %}></script>
-
-<script>
-  jQuery(function( $ ){
-       $('#preloadimages img').preload({
-            placeholder:'{% static "showdata/loading.gif" %}',
-            notFound:'{% static "showdata/access-error-logs.png" %}',
-            threshold:2
-       })
-  });
-</script>
-
-
-
-
-{% endblock %}
-
-{% block content %}
 
 <div class="container-fluid">
-  <div class="row">
-    <div class="col-xs-9">
-      <h4>
-	{{bcode.description}}  {{bcode.userunit}}<br>
-	{{trangetxt}}<br>
-	{{leveltxt}}<br>
-	{{day}}/{{month}}/{{year}}{% if hour %}  {{hour}}:00 +/- 30 min{% else %} values in the day{% endif %} GMT
-      </h4>
-    </div>
-
-    <div class="col-xs-3">
-      <div class=row>
-	<div class="col-xs-1 col-xs-offset-2">
-	  {% if more %}
-	  <p class="text-center">
-	    <a class="btn btn-default" role="button" href="{{more}}">{% trans "More" %}</a>
-	  </p>
-	  {% endif %}
-	</div>
-      </div>
-      <div class=row>
-	<div class="col-xs-1">
-          <p class="text-center">
-	    <a class="btn btn-default" role="button" href="{{previous}}">{% trans "Prev" %}</a>
-	  </p>
-	</div>
-	<div class="col-xs-1 col-xs-offset-3">
-          <p class="text-center">
-	    <a class="btn btn-default" role="button" href="{{next}}">{% trans "Next" %}</a>
-	  </p>
-	</div>
-      </div>
-      <div class=row>
-	<div class="col-xs-1 col-xs-offset-2">
-	  {% if less %}
-	  <p class="text-center">
-	    <a class="btn btn-default" role="button" href="{{less}}">{% trans "Less" %}</a>
-	  </p>
-	  {% endif %}
-	</div>
-      </div>
-    </div>
-  </div>
 
 
   <script type="text/javascript">
-
-
-{% if hour %}
-var url = "{% url 'api:v1:spatialserieshourly' 'geojson' ident coords network trange level var year month day hour %}?{% if dsn %}dsn={{dsn}}{% endif %}{% for key, value in spatialbox.items %}&{{key}}={{value}}{% endfor %}{% for key, value in timebox.items %}&{{key}}={{value}}{% endfor %}";
-{% else %}
-var url = "{% url 'api:v1:spatialseriesdaily' 'geojson' ident coords network trange level var year month day %}?{% if dsn %}dsn={{dsn}}{% endif %}{% for key, value in spatialbox.items %}&{{key}}={{value}}{% endfor %}{% for key, value in timebox.items %}&{{key}}={{value}}{% endfor %}";
-{% endif %}
-
-
-
 
 function null2_(i)
 {
     return(i === null) ? "-" : i;
 }
-
-
-
-
 
 function setpopup(feature)
 {
@@ -199,65 +70,6 @@ function setpopup(feature)
 
 </script>
 
-  {% leaflet_map "spots" callback="window.map_init" %}
 
-
-  <div class="row">
-    <div class="col-xs-4">
-      <p style="text-align:left">
-	<a href='
-	   {% if hour %}
-	     {% url 'showdata:spatialserieshourly' '*' '*' '*' trange level var year month day hour %}?{% if dsn %}dsn={{dsn}}{% endif %}{% for key, value in spatialbox.items %}&{{key}}={{value}}{% endfor %}{% for key, value in timebox.items %}&{{key}}={{value}}{% endfor %}
-	   {% elif day %}
-	     {% url 'showdata:spatialseriesdaily' '*' '*' '*' trange level var year month day %}?{% if dsn %}dsn={{dsn}}{% endif %}{% for key, value in spatialbox.items %}&{{key}}={{value}}{% endfor %}{% for key, value in timebox.items %}&{{key}}={{value}}{% endfor %}
-	   {% endif %}
-	   '>{% trans "Show all values on a map" %}
-	</a>
-      </p>
-    </div>
-
-    
-    {% if dsn == 'sample' or dsn == 'report' %}
-    <div class="col-xs-4 col-xs-offset-4">
-      <p style="text-align:left">
-	<a href='
-	   {% if hour %}
-	   {% url 'showdata:timeserieshourly' ident coords network trange level var year month day hour %}?{% if dsn %}dsn={{dsn}}{% endif %}{% for key, value in spatialbox.items %}&{{key}}={{value}}{% endfor %}{% for key, value in timebox.items %}&{{key}}={{value}}{% endfor %}
-	   {% elif day %}
-	   {% url 'showdata:timeseriesdaily'  ident coords network trange level var year month day %}?{% if dsn %}dsn={{dsn}}{% endif %}{% for key, value in spatialbox.items %}&{{key}}={{value}}{% endfor %}{% for key, value in timebox.items %}&{{key}}={{value}}{% endfor %}
-	   {% endif %}
-	   '>{% trans "Show all values on a graph" %}
-	</a>
-      </p>
-    </div>
-  {% endif %}
-  </div>
-
-    
-  <div class="row">
-    <div class="col-xs-4">
-      <p style="text-align:left">
-	<a href='
-	   {% url 'showdata:stations' ident coords network trange level var %}?{% if dsn %}dsn={{dsn}}{% endif %}{% for key, value in spatialbox.items %}&{{key}}={{value}}{% endfor %}{% for key, value in timebox.items %}&{{key}}={{value}}{% endfor %}
-	   '>{% trans "Show stations on a map" %}
-	</a>
-      </p>
-    </div>
-    
-    <div class="col-xs-4 col-xs-offset-4">
-      <p style="text-align:left">
-
-	<a href='
-	   {% if hour %}
-	   {% url 'api:v1:spatialserieshourly' 'dbajson' ident coords network trange level var year month day hour %}?{% if dsn %}dsn={{dsn}}{% endif %}{% for key, value in spatialbox.items %}&{{key}}={{value}}{% endfor %}{% for key, value in timebox.items %}&{{key}}={{value}}{% endfor %}
-	   {% else %}
-	   {% url 'api:v1:spatialseriesdaily' 'dbajson' ident coords network trange level var year month day %}?{% if dsn %}dsn={{dsn}}{% endif %}{% for key, value in spatialbox.items %}&{{key}}={{value}}{% endfor %}{% for key, value in timebox.items %}&{{key}}={{value}}{% endfor %}
-	   {% endif %}
-	   '>{% trans "Download data" %}
-	</a>
-      </p>
-    </div>
-  </div>
 </div>
 
-{% endblock %}
