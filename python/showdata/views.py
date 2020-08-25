@@ -83,7 +83,7 @@ def rainbotimeseries(request, **kwargs):
     return timeseries(request,html_template="showdata/rainbotimeseries.html",**kwargs)
 
 
-def timeseries(request,html_template="showdata/timeseries.html", **kwargs):
+def timeseries(request,html_template="showdata/timeseries2.html", **kwargs):
 
     dsn=request.GET.get('dsn', defaulttimedsn)
     if (dsn=="report" or dsn=="sample"):
